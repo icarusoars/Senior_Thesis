@@ -32,11 +32,11 @@ text_replacements = {
 options = ['Traditional', 'Advanced', 'Usage', 'Player Tracking', 'Hustle', 'Defense']
 
 # storage location - where pickle files get stored
-store_location = '../Pickles/2019-2020/'
+store_location = '../Pickles/2019_2020'
 
 # specify dates to scrape
-start_date = date(2019, 10, 23)
-end_date   = date(2020, 3, 10)
+start_date = date(2019, 11, 4)
+end_date   = date(2019, 11, 8)
 delta      = timedelta(days=1)
 
 
@@ -48,10 +48,15 @@ browser = webdriver.Chrome(executable_path=path_to_chromedriver)
 date_scrape = start_date
 while date_scrape <= end_date:
     date_str = date_scrape.strftime("%m/%d/%Y")
+    date_str_2 = date_scrape.strftime("%Y_%m_%d")
     date_scrape += delta
     
+    print("Scraping Games on Date: {}".format(date_str))
+    
+#     time.sleep(6)
     date_url = 'https://stats.nba.com/scores/{}'.format(date_str)
-    browser.get(url)
+    browser.get(date_url)
+    time.sleep(5)
     
     
     # get all boxscore links
@@ -75,7 +80,7 @@ while date_scrape <= end_date:
             # only select new options item if not first-time loading page
             if i != 0:
                 browser.find_element_by_partial_link_text(option).click()
-                time.sleep(2)
+                time.sleep(3)
 
 
             # scrape 2 boxscore tables
@@ -125,7 +130,7 @@ while date_scrape <= end_date:
 
             # open the options menu
             browser.find_element_by_partial_link_text(option).click()
-            time.sleep(1)
+            time.sleep(2)
 
         # combine all the stats and write to a pickle file
         team1_df = pd.merge(team1_stats_dfs[0], team1_stats_dfs[1].drop(columns = ['MIN']),
@@ -163,10 +168,10 @@ while date_scrape <= end_date:
         team2_df.insert(0, 'TEAM', team2)
 
         teams_df = pd.concat([team1_df, team2_df], ignore_index=True)
-        teams_df.to_pickle('../Pickles/Test/{}_{}_{}'.format(date_str, team1, team2))
+        teams_df.to_pickle('{}/{}_{}_{}'.format(store_location, date_str_2, team1.replace(' ','-'), team2.replace(' ','-')))
 
         # finish scraping the stats from all the options, go back to the previous page listing all games in one day
         browser.get(date_url)
-        time.sleep(3)
+        time.sleep(5)
     
     
